@@ -1,0 +1,32 @@
+{
+  "name": "halo",
+  "version": "0.0.1",
+  "description": "A better TypeScript webapp framework",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/davidwhitney/halo.git"
+  },
+  "keywords": [
+    "halo",
+    "http",
+    "rest",
+    "api",
+    "app",
+    "server"
+  ],
+  "author": "David Whitney",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/davidwhitney/halo/issues"
+  },
+  "homepage": "https://github.com/davidwhitney/halo#readme",
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}
