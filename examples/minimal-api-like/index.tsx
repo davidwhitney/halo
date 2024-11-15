@@ -7,12 +7,18 @@ class Handler implements RouteHandlerClass {
     }
 }
 
+function MyComponent() {
+    return (<div>Hello World!!!</div>);
+}
+
 const router = new RouteTable();
 router.get('/hello', Handler);
 router.get('/world', async (ctx: Context) => {
     console.log('world');
     return 'world';
 });
+
+router.get('/react', <MyComponent />);
 
 const app = new Application(router);
 app.listen(3000);
