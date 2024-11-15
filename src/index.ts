@@ -1,22 +1,52 @@
-import NodeHttpListener from "./listeners/NodeHttpListener";
+import NodeHttpAdapter from "./adapters/NodeHttpAdapter";
 
-export type RouteHandlerClass = {
-    handle(ctx: Context): Promise<any>;
-}
-
-export type RouteHandlerConstructor = {
-    new (): RouteHandlerClass;
-}
-
+export type RouteHandlerClass = { handle(ctx: Context): Promise<any>; }
+export type RouteHandlerConstructor = { new (): RouteHandlerClass; }
 export type RouteHandlerFunction = (ctx: Context) => Promise<any>;
-
 export type RouteHandler = RouteHandlerClass | RouteHandlerFunction | RouteHandlerConstructor;
+export interface RouteRegistration { specifier: string; handler: RouteHandler; }
+
+class FunctionWrappingRouteHandler implements RouteHandlerClass {
+    constructor(private handler: RouteHandlerFunction) {}
+    public async handle(ctx: Context) {
+        return this.handler(ctx);
+    }
+}
 
 export class RouteTable {
     public entries: Map<string, RouteHandler> = new Map();
 
     public get(path: string, handler: RouteHandler) {
         this.entries.set(path, handler);
+    }
+
+    public match(path: string): RouteRegistration | undefined {
+        // TODO: handle wildcards w/ regex
+
+        const handler = this.entries.get(path);
+        return handler ? { specifier: path, handler } : undefined;
+    }
+}
+
+export class Activator {
+    public createInstance(registration: RouteRegistration) {
+        const { handler } = registration;
+
+        // TODO: do this properly with type guards
+        // TODO: DI for constructor injection
+
+        if (typeof handler === 'function') {
+            if (handler.prototype && handler.prototype.handle) {
+                // It's a class constructor
+                return new handler();
+            } else {
+                // It's a regular function handler
+                return new FunctionWrappingRouteHandler(handler);
+            }
+        } else {
+            // Handler is already an instance
+            return handler;
+        }
     }
 }
 
@@ -25,11 +55,13 @@ export class Context {
 }
 
 export class Application {
-    private httpHost: NodeHttpListener;
+    private activator: Activator;
+    private httpHost: NodeHttpAdapter;
     private router: RouteTable;
 
     constructor(router: RouteTable) {
-        this.httpHost = new NodeHttpListener();
+        this.activator = new Activator();
+        this.httpHost = new NodeHttpAdapter();
         this.router = router || new RouteTable();
     }
 
@@ -40,37 +72,30 @@ export class Application {
     }
 
     private async processRequest(req: any, res: any) {
+        const pipeline = new RequestPipeline(this.router, this.activator);
+        pipeline.processRequest(req, res);
+    }
+}
+
+export class RequestPipeline {
+    constructor(private router: RouteTable, private activator: Activator) {}
+    
+    public async processRequest(req: any, res: any) {
         try {
             // Get path from request URL
             const path = req.url || '/';
             
             // Look up handler
-            const handler = this.router.entries.get(path);
+            const handler = this.router.match(path);
             if (!handler) {
                 res.writeHead(404);
                 res.end('Not Found');
                 return;
             }
-    
-            // Create context
+
             const ctx = new Context();
-    
-            // Execute handler based on type
-            let result;
-            
-            if (typeof handler === 'function') {
-                if (handler.prototype && handler.prototype.handle) {
-                    // It's a class constructor
-                    const instance = new handler();
-                    result = await instance.handle(ctx);
-                } else {
-                    // It's a regular function handler
-                    result = await handler(ctx);
-                }
-            } else {
-                // Handler is already an instance
-                result = await handler.handle(ctx);
-            }
+            const handlerInstance = this.activator.createInstance(handler);
+            const result = handlerInstance.handle(ctx);
 
             // Send response
             res.writeHead(200, { 'Content-Type': 'application/json' });
