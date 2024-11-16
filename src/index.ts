@@ -7,6 +7,7 @@ import { Configuration } from './Configuration';
 import { LoggingMiddleware } from './requestHandling/middleware/LoggingMiddleware';
 import createMiddlewareChain from './requestHandling/middleware/createMiddlewareChain';
 import createHttpAdapter from "./adapters/HttpAdapterFactory";
+import { ErrorHandlingMiddleware } from './requestHandling/middleware/ErrorHandlingMiddleware';
 
 export class Application {
     public configuration: Configuration;
@@ -19,6 +20,7 @@ export class Application {
             router: new RouteTable(),
             middleware: [
                 LoggingMiddleware,
+                ErrorHandlingMiddleware,
                 RouteHandlerMiddlware
             ]
         }

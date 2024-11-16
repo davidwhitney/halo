@@ -8,17 +8,9 @@ import { NotFoundResult } from "./results/NotFoundResult";
 export class RouteHandlerMiddlware implements Middleware {
     public async process(ctx: Context, next: NextMiddleware) {
         Logger.info("RHMW: Start");
-
-        const { config } = ctx;
-
-        try {
-            const result = await this.handle(ctx);
-            result?.executeResult(ctx.output);
-        } catch (error) {
-            config.errorHandler(error);
-        }
-
-        Logger.info("RHMW: calling next..");
+    
+        const result = await this.handle(ctx);
+        result?.executeResult(ctx.output);
 
         await next();
 
