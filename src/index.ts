@@ -1,18 +1,12 @@
 import { Activator } from './typeActivation/Activator';
 import { RouteTable } from './routing/RouteTable';
-import { RouteHandler as RouteHandler } from "./requestHandling/RouteHandler";
-import { IHttpAdapter } from './adapters/IHttpAdapter';
-import createHttpAdapter from "./adapters/HttpAdapterFactory";
-import { ErrorHandler } from './types';
+import { RouteHandlerMiddlware as RouteHandlerMiddlware } from "./requestHandling/RouteHandlerMiddlerware";
 import { DeveloperPageErrorHandler } from './requestHandling/errors/DeveloperPageErrorHandler';
 import { Context } from './requestHandling/Context';
-
-export interface Configuration {
-    errorHandler: ErrorHandler,
-    httpHost: IHttpAdapter,
-    activator: Activator,
-    router: RouteTable    
-}
+import { Configuration } from './Configuration';
+import { LoggingMiddleware } from './requestHandling/middleware/LoggingMiddleware';
+import createMiddlewareChain from './requestHandling/middleware/createMiddlewareChain';
+import createHttpAdapter from "./adapters/HttpAdapterFactory";
 
 export class Application {
     public configuration: Configuration;
@@ -22,7 +16,11 @@ export class Application {
             errorHandler: DeveloperPageErrorHandler,
             httpHost: createHttpAdapter(),
             activator: new Activator(),
-            router: new RouteTable()
+            router: new RouteTable(),
+            middleware: [
+                LoggingMiddleware,
+                RouteHandlerMiddlware
+            ]
         }
 
         this.configuration = { ...this.configuration, ...configuration };
@@ -30,17 +28,14 @@ export class Application {
 
     public listen(port: number) {
         this.configuration.httpHost.listen(port, async (output) => {
-            const ctx: Context = { output };
+            const ctx: Context = { 
+                output: output, 
+                config: this.configuration 
+            };
 
-            const pipeline = new RouteHandler(
-                this.configuration.router, 
-                this.configuration.activator, 
-                this.configuration.errorHandler
-            );
+            const { middleware, nextFunc } = createMiddlewareChain(this.configuration, ctx);
+            await middleware.process(ctx, nextFunc!);
 
-            const actionResult = await pipeline.processRequest(ctx);
-
-            actionResult?.executeResult(output);
         });
     }
 }
