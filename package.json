@@ -6,7 +6,7 @@
   "scripts": {
     "test": "vitest",
     "example:minimalapi": "tsx watch ./examples/minimal-api-like/index.tsx",
-    "deno:example:minimalapi": "deno run --allow-net --allow-env --unstable-sloppy-imports ./examples/minimal-api-like/index.tsx"
+    "deno:example:minimalapi": "deno run --allow-net --allow-env --unstable-sloppy-imports --watch ./examples/minimal-api-like/index.tsx"
   },
   "repository": {
     "type": "git",

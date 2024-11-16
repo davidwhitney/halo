@@ -1,4 +1,4 @@
-import { ComponentResult } from "../requestHandling/ComponentResult";
+import { ComponentResult } from "../requestHandling/results/ComponentResult";
 import { Context } from "../requestHandling/Context";
 import { RouteHandlerClass } from "../types";
 

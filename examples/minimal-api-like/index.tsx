@@ -3,10 +3,10 @@ import { Application } from "../../src";
 import { Context } from "../../src/requestHandling/Context";
 import { RouteTable } from '../../src/routing/RouteTable';
 import { RouteHandlerClass } from "../../src/types";
+import { StringResult } from '../../src/requestHandling/results/StringResult';
 
 class Handler implements RouteHandlerClass {
     public async handle(ctx: Context) {
-        console.log('hello');
         return 'hello';
     }
 }
@@ -18,8 +18,13 @@ function MyComponent() {
 const router = new RouteTable();
 router.get('/hello', Handler);
 router.get('/world', async (ctx: Context) => {
-    console.log('world');
-    return 'world';
+    return {
+        foo: "world"
+    };
+});
+
+router.get('/helloworld', async (ctx: Context) => {
+    return new StringResult('hello world');
 });
 
 router.get('/react', <MyComponent />);

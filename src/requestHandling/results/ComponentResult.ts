@@ -1,6 +1,6 @@
 import * as ReactDOMServer from 'react-dom/server';
 import { IActionResult } from './IActionResult';
-import { IOutputChannel } from '../adapters/IOutputChannel';
+import { IOutputChannel } from '../../adapters/IOutputChannel';
 
 export class ComponentResult implements IActionResult {
     constructor(private component: any, private props: any) { }

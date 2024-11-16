@@ -9,8 +9,6 @@ export class RouteTable {
 
     public match(metadata: RequestMetadata): RouteRegistration | undefined {
         // TODO: handle wildcards w/ regex
-        console.log(metadata);
-
         const urlObj = new URL(metadata.url);
 
         const handler = this.entries.get(urlObj.pathname);

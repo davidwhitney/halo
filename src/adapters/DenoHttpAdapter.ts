@@ -1,14 +1,22 @@
+import { Logger } from '../observability/Logger';
+import { IHttpAdapter } from './IHttpAdapter';
 import { HostingRequest, IOutputChannel, OnRequestCallback } from './IOutputChannel';
 
-export default class DenoHttpAdapter {
+declare const Deno: any;
+
+export default class DenoHttpAdapter implements IHttpAdapter {
     public listen(port: number, onRequest: OnRequestCallback) {
+        Deno.serve({ port },
+            async (req: any) => {
+                Logger.log(`Request: ${req.method} ${req.url}`);
+                    
+                const channel = new DenoOutputChannel(req);
+                await onRequest(channel);
 
-        Deno.serve((req) => {
-            console.log('Incoming request:', req.url);
-            const channel = new DenoOutputChannel(req);
-            onRequest(channel);
-
-            return new Response(channel.response.body);
+                return new Response(channel.response.body, {
+                    status: channel.response.statusCode,
+                    headers: channel.response.headers
+                });
         });
     }
 }
@@ -21,6 +29,8 @@ export class DenoOutputChannel implements IOutputChannel {
         body: any;
     };
 
+    public awaitable: Promise<void> = new Promise(() => {});
+
     constructor(request: any) {
         this.request = {
             url: request.url!,
@@ -29,9 +39,9 @@ export class DenoOutputChannel implements IOutputChannel {
         };
 
         this.response = {
-            statusCode: 200,
+            statusCode: 500,
             headers: {},
-            body: ''
+            body: "Internal Server Error"
         };
     }
 

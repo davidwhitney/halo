@@ -1,11 +1,15 @@
 import * as http from 'node:http';
 import { HostingRequest, IOutputChannel, OnRequestCallback } from './IOutputChannel';
+import { IHttpAdapter } from './IHttpAdapter';
+import { Logger } from '../observability/Logger';
 
-export default class NodeHttpAdapter {
+export default class NodeHttpAdapter implements IHttpAdapter {
     public listen(port: number, onRequest: OnRequestCallback) {
         const server = http.createServer(async (req, res) => {
+            Logger.log(`Request: ${req.method} ${req.url}`);
+
             const channel = new NodeOutputChannel(req, res);
-            onRequest(channel);
+            await onRequest(channel);
         });
 
         server.listen(port, () => {

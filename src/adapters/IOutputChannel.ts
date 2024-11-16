@@ -1,4 +1,4 @@
-export type OnRequestCallback = (channel: IOutputChannel) => void;
+export type OnRequestCallback = (channel: IOutputChannel) => Promise<void>;
 
 export interface HostingRequest { 
     url: string;

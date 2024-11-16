@@ -7,3 +7,5 @@ export type RouteHandler = RouteHandlerClass | RouteHandlerFunction | RouteHandl
 export interface RouteRegistration { specifier: string; handler: RouteHandler; }
 
 export type RequestMetadata = { url: string, method: string, headers: Record<string, string | string[]> };
+
+export type ErrorHandler = (error: unknown, ctx: Context) => void;
