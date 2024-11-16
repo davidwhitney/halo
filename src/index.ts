@@ -1,13 +1,13 @@
 import { Activator } from './typeActivation/Activator';
 import { RouteTable } from './routing/RouteTable';
-import { RouteHandlerMiddlware as RouteHandlerMiddlware } from "./requestHandling/RouteHandlerMiddlerware";
+import { RouterMiddleware as RouterMiddleware } from "./requestHandling/RouterMiddleware";
 import { DeveloperPageErrorHandler } from './requestHandling/errors/DeveloperPageErrorHandler';
 import { Context } from './requestHandling/Context';
 import { Configuration } from './Configuration';
 import { LoggingMiddleware } from './requestHandling/middleware/LoggingMiddleware';
+import { ErrorHandlingMiddleware } from './requestHandling/middleware/ErrorHandlingMiddleware';
 import createMiddlewareChain from './requestHandling/middleware/createMiddlewareChain';
 import createHttpAdapter from "./adapters/HttpAdapterFactory";
-import { ErrorHandlingMiddleware } from './requestHandling/middleware/ErrorHandlingMiddleware';
 
 export class Application {
     public configuration: Configuration;
@@ -20,12 +20,14 @@ export class Application {
             router: new RouteTable(),
             middleware: [
                 LoggingMiddleware,
-                ErrorHandlingMiddleware,
-                RouteHandlerMiddlware
+                ErrorHandlingMiddleware
             ]
-        }
+        };
 
         this.configuration = { ...this.configuration, ...configuration };
+
+        // If this isn't the end of the chain the whole framework doesn't execute!
+        this.configuration.middleware.push(RouterMiddleware);
     }
 
     public listen(port: number) {

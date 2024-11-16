@@ -5,7 +5,7 @@ import { IActionResult } from "./results/IActionResult";
 import { JsonResult } from "./results/JsonResult";
 import { NotFoundResult } from "./results/NotFoundResult";
 
-export class RouteHandlerMiddlware implements Middleware {
+export class RouterMiddleware implements Middleware {
     public async process(ctx: Context, next: NextMiddleware) {
         Logger.info("RHMW: Start");
     
