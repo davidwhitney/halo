@@ -1,13 +1,41 @@
-import { IncomingMessage, ServerResponse } from "http";
 import * as React from 'react';
 import * as ReactDOMServer from 'react-dom/server';
 import NodeHttpAdapter from "./adapters/NodeHttpAdapter";
+import { IOutputChannel } from "./adapters/IOutputChannel";
 
 export type RouteHandlerClass = { handle(ctx: Context): Promise<any>; }
 export type RouteHandlerConstructor = { new (): RouteHandlerClass; }
 export type RouteHandlerFunction = (ctx: Context) => Promise<any>;
 export type RouteHandler = RouteHandlerClass | RouteHandlerFunction | RouteHandlerConstructor | JSX.Element;
 export interface RouteRegistration { specifier: string; handler: RouteHandler; }
+
+export type RequestMetadata = { url: string, method: string, headers: Record<string, string | string[]> };
+
+class Logger {
+    static info(message: string, ...args: any[]) {
+        console.log(message, ...args);
+    }
+
+    static error(message: string, ...args: any[]) {
+        console.error(message, ...args);
+    }
+
+    static warn(message: string, ...args: any[]) {
+        console.warn(message, ...args);
+    }
+
+    static debug(message: string, ...args: any[]) {
+        console.debug(message, ...args);
+    }
+
+    static trace(message: string, ...args: any[]) {
+        console.trace(message, ...args);
+    }
+
+    static log(message: string, ...args: any[]) {
+        console.log(message, ...args);
+    }
+}
 
 class FunctionWrappingRouteHandler implements RouteHandlerClass {
     constructor(private handler: RouteHandlerFunction) {}
@@ -30,41 +58,45 @@ export class RouteTable {
         this.entries.set(path, handler);
     }
 
-    public match(path: string): RouteRegistration | undefined {
+    public match(metadata: RequestMetadata): RouteRegistration | undefined {
         // TODO: handle wildcards w/ regex
-
-        const handler = this.entries.get(path);
-        return handler ? { specifier: path, handler } : undefined;
+        const { url } = metadata;
+        const handler = this.entries.get(url);
+        return handler ? { specifier: url, handler } : undefined;
     }
 }
 
 export class Activator {
-    public createInstance(registration: RouteRegistration) {
+    public createInstance(registration: RouteRegistration): RouteHandlerClass {
         const { handler } = registration;
 
         // TODO: do this properly with type guards
         // TODO: DI for constructor injection
 
-        let instance: RouteHandler;
+        let instance: RouteHandlerClass;
         if (typeof handler === 'function') {
-            if (handler.prototype && handler.prototype.handle) {
+            if (handler.prototype && handler.prototype.handle && this.isConstuctorFunction(handler)) {
                 // It's a class constructor
-                instance = new handler();
+                instance = new handler() as RouteHandlerClass;
             } else {
                 // It's a regular function handler
-                instance = new FunctionWrappingRouteHandler(handler);
+                instance = new FunctionWrappingRouteHandler(handler as RouteHandlerFunction) as RouteHandlerClass;
             }
         } else if (React.isValidElement(handler)) {
             // It's a JSX element
-            instance = new ServerSideComponentRouteHandler(handler);
+            instance = new ServerSideComponentRouteHandler(handler) as RouteHandlerClass;
         } else {
             // Handler is already an instance
-            instance = handler;
+            instance = handler as RouteHandlerClass;
         }
 
-        console.info('Created instance:', instance);
+        Logger.info('Created instance:', instance);
 
         return instance;
+    }
+
+    private isConstuctorFunction(handler: RouteHandler): handler is RouteHandlerConstructor {
+        return typeof handler === 'function';
     }
 }
 
@@ -84,53 +116,50 @@ export class Application {
     }
 
     public listen(port: number) {
-        this.httpHost.listen(port, (req, res) => {
-            this.processRequest(req, res);
+        this.httpHost.listen(port, (output) => {
+            const pipeline = new RequestPipeline(this.router, this.activator);
+            pipeline.processRequest(output);
         });        
-    }
-
-    private async processRequest(req: any, res: any) {
-        const pipeline = new RequestPipeline(this.router, this.activator);
-        pipeline.processRequest(req, res);
     }
 }
 
 interface IActionResult {
-    executeResult(res: ServerResponse<IncomingMessage>): void;
+    executeResult(output: IOutputChannel): void;
 }
 
 class JsonResult implements IActionResult {
     constructor(private data: any, private statusCode = 200) {}
 
-    public executeResult(res: ServerResponse<IncomingMessage>) {
-        res.writeHead(this.statusCode, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(this.data));
+    public executeResult(output: IOutputChannel) {
+        output.writeHeaders(this.statusCode, { 'Content-Type': 'application/json' });
+        output.writeBody(JSON.stringify(this.data));
+        output.end();
     }
 }
 
 class ComponentResult implements IActionResult {
     constructor(private component: any, private props: any) {}
 
-    public executeResult(res: ServerResponse<IncomingMessage>) {
+    public executeResult(output: IOutputChannel) {
         const html = ReactDOMServer.renderToString(this.component);
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.end(html);        
+        output.writeHeaders(200, { 'Content-Type': 'text/html' });
+        output.writeBody(html);
+        output.end();
     }
 }
 
 export class RequestPipeline {
     constructor(private router: RouteTable, private activator: Activator) {}
     
-    public async processRequest(req: any, res: any) {
+    public async processRequest(output: IOutputChannel) {
         try {
-            // Get path from request URL
-            const path = req.url || '/';
             
             // Look up handler
-            const handler = this.router.match(path);
+            const handler = this.router.match(output.request);
             if (!handler) {
-                res.writeHead(404);
-                res.end('Not Found');
+                output.writeHeaders(404, {});
+                output.writeBody('Not Found');
+                output.end();
                 return;
             }
 
@@ -139,14 +168,14 @@ export class RequestPipeline {
             const result = await handlerInstance.handle(ctx);
 
             if ((result as IActionResult).executeResult) {
-                (result as IActionResult).executeResult(res);
+                (result as IActionResult).executeResult(output);
             } else {
-                new JsonResult(result).executeResult(res);
+                new JsonResult(result).executeResult(output);
             }
     
         } catch (error) {
-            console.error(error);
-            new JsonResult({ error: 'Internal Server Error' }, 500).executeResult(res);
+            Logger.error("Pipeline error", error);
+            new JsonResult({ error: 'Internal Server Error' }, 500).executeResult(output);
         }
     }
 }
