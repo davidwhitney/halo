@@ -37,6 +37,10 @@ router.get('/nothing', async (ctx: Context) => {
     return new EmptyResult();
 });
 
+router.get('/error', async (ctx: Context) => {
+    throw new Error('oops');
+});
+
 router.get('/react', <MyComponent />);
 
 const app = new Application({ router });

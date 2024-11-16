@@ -2,12 +2,12 @@ import * as ReactDOMServer from 'react-dom/server';
 import { IActionResult } from './IActionResult';
 import { IOutputChannel } from '../../adapters/IOutputChannel';
 
-export class ComponentResult implements IActionResult {
-    constructor(private component: any, private props: any) { }
+export class ReactComponentResult implements IActionResult {
+    constructor(private component: any, private props: any, private statusCode: number = 200) { }
 
     public executeResult(output: IOutputChannel) {
         const html = ReactDOMServer.renderToString(this.component);
-        output.writeHeaders(200, { 'Content-Type': 'text/html' });
+        output.writeHeaders(this.statusCode, { 'Content-Type': 'text/html' });
         output.writeBody(html);
         output.end();
     }
