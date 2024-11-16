@@ -36,5 +36,4 @@ export class NodeOutputChannel implements IOutputChannel {
     public end() {
         this.response.end();
     }
-
 }

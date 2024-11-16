@@ -1,4 +1,7 @@
-import { Context, RouteHandlerClass, RouteTable, Application } from "../../src";
+import { Application } from "../../src";
+import { Context } from "../../src/requestHandling/Context";
+import { RouteTable } from '../../src/routing/RouteTable';
+import { RouteHandlerClass } from "../../src/types";
 
 class Handler implements RouteHandlerClass {
     public async handle(ctx: Context) {
