@@ -1,6 +1,10 @@
 import { IOutputChannel } from '../../adapters/IOutputChannel';
 import { IActionResult } from './IActionResult';
 
+export function stringResult(data: string, statusCode = 200) {
+    return new StringResult(data, statusCode);
+}
+
 export class StringResult implements IActionResult {
     constructor(private data: string, private statusCode = 200) { }
 

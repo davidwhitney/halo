@@ -2,6 +2,10 @@ import { IOutputChannel } from '../../adapters/IOutputChannel';
 import { Logger } from '../../observability/Logger';
 import { IActionResult } from './IActionResult';
 
+export function json(data: any, statusCode = 200) {
+    return new JsonResult(data, statusCode);
+}
+
 export class JsonResult implements IActionResult {
     constructor(private data: any, private statusCode = 200) { }
 

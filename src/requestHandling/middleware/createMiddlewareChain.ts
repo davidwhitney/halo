@@ -4,16 +4,15 @@ import { MiddlewareChainItem } from "./Middleware";
 
 export default function(config: Configuration, ctx: Context) {
     const middlewareCfg = config.middleware;
-    const middlewarePipeline: MiddlewareChainItem[] = middlewareCfg.map(mw => {
-        return { middleware: new mw(), nextFunc: null };
-    });
+    const pipeline = middlewareCfg
+        .map(mw => ({ middleware: new mw(), nextFunc: null }) as MiddlewareChainItem);
 
     // Create next function entries
-    for (let i = 0; i < middlewarePipeline.length; i++) {
-        const entry = middlewarePipeline[i];           
+    for (let i = 0; i < pipeline.length; i++) {
+        const entry = pipeline[i];           
 
         entry.nextFunc = async () => {                    
-            const next = middlewarePipeline[i + 1];
+            const next = pipeline[i + 1];
             const nextMiddleware = next?.middleware;
             const nextContinuation = next?.nextFunc;
 
@@ -25,5 +24,5 @@ export default function(config: Configuration, ctx: Context) {
         }
     }
 
-    return middlewarePipeline[0];
+    return pipeline[0];
 }
