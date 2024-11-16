@@ -2,10 +2,10 @@ import React from 'react';
 import { Application } from "../../src";
 import { Context } from "../../src/requestHandling/Context";
 import { RouteTable } from '../../src/routing/RouteTable';
-import { RouteHandlerClass } from "../../src/types";
+import { RouteHandler } from "../../src/types";
 import { StringResult } from '../../src/requestHandling/results/StringResult';
 
-class Handler implements RouteHandlerClass {
+class Handler implements RouteHandler {
     public async handle(ctx: Context) {
         return 'hello';
     }

@@ -1,9 +1,9 @@
-import { RequestMetadata, RouteHandler, RouteRegistration } from "../types";
+import { RequestMetadata, IHandleRoutes, RouteRegistration } from "../types";
 
 export class RouteTable {
-    public entries: Map<string, RouteHandler> = new Map();
+    public entries: Map<string, IHandleRoutes> = new Map();
 
-    public get(path: string, handler: RouteHandler) {
+    public get(path: string, handler: IHandleRoutes) {
         this.entries.set(path, handler);
     }
 

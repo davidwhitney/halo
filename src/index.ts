@@ -1,6 +1,6 @@
 import { Activator } from './typeActivation/Activator';
 import { RouteTable } from './routing/RouteTable';
-import { RequestPipeline } from "./requestHandling/RequestPipeline";
+import { RouteHandler as RouteHandler } from "./requestHandling/RouteHandler";
 import { IHttpAdapter } from './adapters/IHttpAdapter';
 import createHttpAdapter from "./adapters/HttpAdapterFactory";
 import { ErrorHandler } from './types';
@@ -32,7 +32,7 @@ export class Application {
         this.configuration.httpHost.listen(port, async (output) => {
             const ctx: Context = { output };
 
-            const pipeline = new RequestPipeline(
+            const pipeline = new RouteHandler(
                 this.configuration.router, 
                 this.configuration.activator, 
                 this.configuration.errorHandler

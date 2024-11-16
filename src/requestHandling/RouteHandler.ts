@@ -1,4 +1,3 @@
-import { IOutputChannel } from "../adapters/IOutputChannel";
 import { Logger } from "../observability/Logger"
 import { RouteTable } from "../routing/RouteTable";
 import { Activator } from "../typeActivation/Activator";
@@ -8,7 +7,7 @@ import { IActionResult } from "./results/IActionResult";
 import { JsonResult } from "./results/JsonResult";
 import { NotFoundResult } from "./results/NotFoundResult";
 
-export class RequestPipeline {
+export class RouteHandler {
     constructor(private router: RouteTable, private activator: Activator, private onError: ErrorHandler) {
     }
 
