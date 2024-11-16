@@ -1,6 +1,6 @@
 import { Activator } from './typeActivation/Activator';
 import { RouteTable } from './routing/RouteTable';
-import { RouterMiddleware as RouterMiddleware } from "./requestHandling/RouterMiddleware";
+import { RouterMiddleware as RouterMiddleware } from "./requestHandling/middleware/RouterMiddleware";
 import { DeveloperPageErrorHandler } from './requestHandling/errors/DeveloperPageErrorHandler';
 import { Context } from './requestHandling/Context';
 import { Configuration } from './Configuration';
@@ -8,6 +8,7 @@ import { LoggingMiddleware } from './requestHandling/middleware/LoggingMiddlewar
 import { ErrorHandlingMiddleware } from './requestHandling/middleware/ErrorHandlingMiddleware';
 import createMiddlewareChain from './requestHandling/middleware/createMiddlewareChain';
 import createHttpAdapter from "./adapters/HttpAdapterFactory";
+import { Logger } from './observability/Logger';
 
 export class Application {
     public configuration: Configuration;
@@ -38,8 +39,12 @@ export class Application {
             };
 
             const { middleware, nextFunc } = createMiddlewareChain(this.configuration, ctx);
+
+            Logger.debug("Running", middleware.name.description);
+
             await middleware.process(ctx, nextFunc!);
 
+            Logger.debug("Finished", middleware.name.description);
         });
     }
 }

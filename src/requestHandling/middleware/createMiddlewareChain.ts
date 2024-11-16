@@ -1,4 +1,5 @@
 import { Configuration } from "../../Configuration";
+import { Logger } from "../../observability/Logger";
 import { Context } from "../Context";
 import { MiddlewareChainItem } from "./Middleware";
 
@@ -20,7 +21,11 @@ export default function(config: Configuration, ctx: Context) {
                 return;
             }
 
+            Logger.debug("Running", nextMiddleware.name.description);
+            
             await nextMiddleware.process(ctx, nextContinuation!);
+
+            Logger.debug("Finished", nextMiddleware.name.description);
         }
     }
 
