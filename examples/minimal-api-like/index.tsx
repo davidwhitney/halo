@@ -7,7 +7,7 @@ import { redirect, empty, stringResult } from "../../src/requestHandling/results
 
 class Handler implements RouteHandler {
     public async handle(ctx: Context) {
-        return 'hello';
+        return stringResult('hello');
     }
 }
 
@@ -40,6 +40,7 @@ router.get('/error', async (ctx: Context) => {
 });
 
 router.get('/react', <MyComponent />);
+router.get('/react2', MyComponent);
 
 const app = new Application({ router });
 app.listen(3000);
