@@ -6,24 +6,19 @@ import { ErrorHandler } from "../types";
 import { Context } from "./Context";
 import { IActionResult } from "./results/IActionResult";
 import { JsonResult } from "./results/JsonResult";
+import { NotFoundResult } from "./results/NotFoundResult";
 
 export class RequestPipeline {
     constructor(private router: RouteTable, private activator: Activator, private onError: ErrorHandler) {
     }
 
-    public async processRequest(output: IOutputChannel) {
+    public async processRequest(ctx: Context) {
         Logger.debug('Processing request');
 
-        const ctx: Context = { output };
-
         try {
-            // Look up handler
-            const handler = this.router.match(output.request);
+            const handler = this.router.match(ctx.output.request);
             if (!handler) {
-                output.writeHeaders(404, {});
-                output.writeBody('Not Found');
-                output.end();
-                return;
+                return new NotFoundResult();
             }
 
             ctx.matchedRoute = handler;
@@ -32,13 +27,12 @@ export class RequestPipeline {
             const result = await handlerInstance.handle(ctx);
 
             if ((result as IActionResult).executeResult) {
-                (result as IActionResult).executeResult(output);
+                return result;
             } else {
-                new JsonResult(result).executeResult(output);
+                return new JsonResult(result);
             }
-
         } catch (error) {
-            this.onError(error, ctx);
+            return this.onError(error);
         }
     }
 }

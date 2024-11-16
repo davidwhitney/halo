@@ -5,6 +5,7 @@ import { IHttpAdapter } from './adapters/IHttpAdapter';
 import createHttpAdapter from "./adapters/HttpAdapterFactory";
 import { ErrorHandler } from './types';
 import { DeveloperPageErrorHandler } from './requestHandling/errors/DeveloperPageErrorHandler';
+import { Context } from './requestHandling/Context';
 
 export interface Configuration {
     errorHandler: ErrorHandler,
@@ -29,13 +30,17 @@ export class Application {
 
     public listen(port: number) {
         this.configuration.httpHost.listen(port, async (output) => {
+            const ctx: Context = { output };
+
             const pipeline = new RequestPipeline(
                 this.configuration.router, 
                 this.configuration.activator, 
                 this.configuration.errorHandler
             );
 
-            await pipeline.processRequest(output);
+            const actionResult = await pipeline.processRequest(ctx);
+
+            actionResult?.executeResult(output);
         });
     }
 }
