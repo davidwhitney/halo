@@ -1,3 +1,4 @@
+import { Context } from "./requestHandling/Context";
 
 export type RouteHandlerClass = { handle(ctx: Context): Promise<any>; }
 export type RouteHandlerConstructor = { new (): RouteHandlerClass; }

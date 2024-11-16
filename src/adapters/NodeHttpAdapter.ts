@@ -23,6 +23,10 @@ export class NodeOutputChannel implements IOutputChannel {
             method: request.method!,
             headers: request.headers! as Record<string, string | string[]>
         };
+
+        if (this.request.url.startsWith("/")) {
+            this.request.url = "http://localhost" + this.request.url;
+        }
     }
 
     public writeHeaders(statusCode: number, headers: Record<string, string>) {

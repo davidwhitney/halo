@@ -1,3 +1,4 @@
+import React from 'react';
 import { Application } from "../../src";
 import { Context } from "../../src/requestHandling/Context";
 import { RouteTable } from '../../src/routing/RouteTable';
