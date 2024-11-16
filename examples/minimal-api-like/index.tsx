@@ -29,5 +29,5 @@ router.get('/helloworld', async (ctx: Context) => {
 
 router.get('/react', <MyComponent />);
 
-const app = new Application(router);
+const app = new Application({ router });
 app.listen(3000);
