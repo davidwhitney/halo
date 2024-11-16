@@ -5,6 +5,7 @@ import { RouteTable } from '../../src/routing/RouteTable';
 import { RouteHandler } from "../../src/types";
 import { StringResult } from '../../src/requestHandling/results/StringResult';
 import { RedirectResult } from '../../src/requestHandling/results/RedirectResult';
+import { EmptyResult } from '../../src/requestHandling/results/EmptyResult';
 
 class Handler implements RouteHandler {
     public async handle(ctx: Context) {
@@ -30,6 +31,10 @@ router.get('/helloworld', async (ctx: Context) => {
 
 router.get('/redirect', async (ctx: Context) => {
     return new RedirectResult('/helloworld');
+});
+
+router.get('/nothing', async (ctx: Context) => {
+    return new EmptyResult();
 });
 
 router.get('/react', <MyComponent />);

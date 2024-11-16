@@ -41,7 +41,7 @@ export class DenoOutputChannel implements IOutputChannel {
         this.response = {
             statusCode: 500,
             headers: {},
-            body: "Internal Server Error"
+            body: null
         };
     }
 
