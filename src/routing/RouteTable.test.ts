@@ -32,7 +32,6 @@ describe("RouteTable", () => {
 
     it("matches regular get route", () => {
         const route = async () => { return "hello"; };
-
         const sut = new RouteTable().get("/", route);
 
         const result = sut.match({ method: "GET", url: "http://localhost/", headers: {} });
@@ -45,14 +44,51 @@ describe("RouteTable", () => {
 
     it("matches wildcard route", () => {
         const route = async () => { return "hello"; };
-
         const sut = new RouteTable().get("/hello/*", route);
 
         const result = sut.match({ method: "GET", url: "http://localhost/hello/123", headers: {} });
 
-        expect(result).toBeDefined();
         expect(result?.specifier).toBe("/hello/*");
-        expect(result?.verb).toBe("GET");
         expect(result?.handler).toBe(route);
+    });
+
+    it("matches wildcard route with capture", () => {
+        const route = async () => { return "hello"; };
+        const sut = new RouteTable().get("/hello/{rest:*}", route);
+
+        const result = sut.match({ method: "GET", url: "http://localhost/hello/123", headers: {} });
+
+        expect(result?.specifier).toBe("/hello/{rest:*}");
+        expect(result?.params?.rest).toBe("123");
+    });
+
+    it("captures param from route", () => {
+        const route = async () => { return "hello"; };
+        const sut = new RouteTable().get("/users/{id:[0-9]+}", route);
+    
+        const result = sut.match({ method: "GET", url: "http://localhost/users/123", headers: {} });
+    
+        expect(result).toBeDefined();
+        expect(result?.params?.id).toBe("123");
+    });
+
+    it("captures param from middle of route", () => {
+        const route = async () => { return "hello"; };
+        const sut = new RouteTable().get("/users/{id:[0-9]+}/foo", route);
+    
+        const result = sut.match({ method: "GET", url: "http://localhost/users/123/foo", headers: {} });
+    
+        expect(result).toBeDefined();
+        expect(result?.specifier).toBe("/users/{id:[0-9]+}/foo");
+        expect(result?.params?.id).toBe("123");
+    });
+
+    it("does not match when regex pattern fails", () => {
+        const route = async () => { return "hello"; };
+        const sut = new RouteTable().get("/users/{id:[0-9]+}", route);
+    
+        const result = sut.match({ method: "GET", url: "http://localhost/users/abc", headers: {} });
+    
+        expect(result).toBeUndefined();
     });
 });

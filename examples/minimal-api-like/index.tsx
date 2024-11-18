@@ -35,6 +35,11 @@ router.get('/nothing', async (ctx: Context) => {
     return empty();
 });
 
+router.get('/with-params/{id:*}', async (ctx: Context) => {
+    const value = ctx.matchedRoute?.params?.id || 'no id';
+    return stringResult(value);
+});
+
 router.get('/error', async (ctx: Context) => {
     throw new Error('oops');
 });

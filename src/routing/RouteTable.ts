@@ -41,47 +41,43 @@ export class RouteTable {
     }
 
     public match(metadata: RequestMetadata): RouteRegistration | undefined {
-        // TODO: handle wildcards w/ regex
         const urlObj = new URL(metadata.url);
-
+    
         for (const [key, value] of this.entries) {
             const [verb, specifier] = key.split('::');
-
+    
             if (verb !== metadata.method) {
                 continue;
             }
-
-            // match exact
+    
+            // Exact match
             if (specifier === urlObj.pathname) {
                 return value;
             }
-            
-            // match wildcards
-            const parts = specifier.split('/');
-            const urlParts = urlObj.pathname.split('/');
-            if (parts.length !== urlParts.length) {
-                continue;
-            }
-
-            let match = true;
-            for (let i = 0; i < parts.length; i++) {
-                if (parts[i] === '*') {
-                    continue;
+    
+            // Convert route pattern to regex
+            const regexPattern = specifier
+                .replace(/\//g, '\\/') // Escape forward slashes
+                .replace(/\*/g, '.*')  // Handle wildcards first - match any characters including /
+                .replace(/\{([^:}]+)(?::([^}]+))?\}/g, (_, name, pattern) => {
+                    return `(?<${name}>${pattern || '[^/]+'})`; 
+                });
+    
+            try {
+                const regex = new RegExp(`^${regexPattern}$`);
+                const match = urlObj.pathname.match(regex);
+    
+                if (match) {
+                    return {
+                        ...value,
+                        params: match.groups || {}
+                    };
                 }
-
-                if (parts[i] !== urlParts[i]) {
-                    match = false;
-                    break;
-                }
+            } catch (err) {
+                console.warn(`Invalid regex pattern for route: ${specifier}`);
             }
-
-            if (match) {
-                return value;
-            }
-
         }
-
-        const key = `${metadata.method}::${urlObj.pathname}`;
-        return this.entries.get(key);
+    
+        return undefined;
     }
 }

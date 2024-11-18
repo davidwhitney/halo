@@ -17,6 +17,7 @@ export interface RouteRegistration {
     verb: string;
     handler: IHandleRoutes;
     type?: RouteType;
+    params?: Record<string, string>;
 }
 
 export type RequestMetadata = { url: string, method: string, headers: Record<string, string | string[]> };

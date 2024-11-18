@@ -4,6 +4,6 @@ import { RouteRegistration } from "../types";
 
 export interface Context {
     output: IOutputChannel;
-    matchedRoute?: RouteRegistration;
     config: Configuration
+    matchedRoute?: RouteRegistration | undefined;
 }
