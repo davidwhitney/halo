@@ -10,7 +10,6 @@ export class StatusCodeResult implements IActionResult {
 
     public executeResult(output: IOutputChannel) {
         output.writeHeaders(this.statusCode, { });
-        output.writeBody(null);
         output.end();
     }
 }

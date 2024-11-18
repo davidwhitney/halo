@@ -14,7 +14,7 @@ import { IOutputChannel } from './adapters/IOutputChannel';
 export class Application {
     public configuration: Configuration;
 
-    constructor(configuration: Partial<Configuration>) {
+    constructor(configuration?: Partial<Configuration>) {
         this.configuration = {
             errorHandler: DeveloperPageErrorHandler,
             httpHost: createHttpAdapter(),
@@ -26,7 +26,7 @@ export class Application {
             ]
         };
 
-        this.configuration = { ...this.configuration, ...configuration };
+        this.configuration = { ...this.configuration, ...configuration || {} };
 
         // If this isn't the end of the chain the whole framework doesn't execute!
         this.configuration.middleware.push(RouterMiddleware);

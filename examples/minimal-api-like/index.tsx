@@ -35,6 +35,10 @@ router.get('/nothing', async (ctx: Context) => {
     return empty();
 });
 
+router.get('/with-wildcard/*', async ({ request }: Context) => {
+    return stringResult("wildcard!");
+});
+
 router.get('/with-params/{id:.+}', async ({ request, params }: Context) => {
     return stringResult(params.id);
 });
