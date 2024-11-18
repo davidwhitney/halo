@@ -1,7 +1,7 @@
 import React from 'react';
 import { Context } from "vm";
 import { Application } from ".";
-import { stringResult, redirect, empty } from "./requestHandling/results";
+import { stringResult, redirect, empty, json } from "./requestHandling/results";
 import { RouteHandler } from "./types";
 import { beforeAll, describe, it, expect } from 'vitest';
 
@@ -17,6 +17,11 @@ describe("Application", () => {
         expect(text).toBe("hello");
     });
 
+    it("can get 404 on not found", async () => {
+        const text = await req("/not-found-here");
+        expect(text.status).toBe(404);
+    });
+
     it("can get basic function-callback request", async () => {
         const text = await reqText("/function-callback");
         expect(text).toBe("hello world");
@@ -24,6 +29,11 @@ describe("Application", () => {
 
     it("can get object result", async () => {
         const text = await reqJson("/object-result");
+        expect(text).toStrictEqual({ foo: "world" });
+    });
+
+    it("can get json object result", async () => {
+        const text = await reqJson("/json-object-result");
         expect(text).toStrictEqual({ foo: "world" });
     });
 
@@ -93,6 +103,7 @@ function getTestApp() {
         }
     })
     .get('/object-result', async (ctx: Context) => { return { foo: "world" };})
+    .get('/json-object-result', async (ctx: Context) => { return json({ foo: "world" });})
     .get('/function-callback', async (ctx: Context) => { return stringResult('hello world'); })
     .get('/redirect', async (ctx: Context) => { return redirect('/helloworld'); })
     .get('/nothing', async (ctx: Context) => { return empty(); })
