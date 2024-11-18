@@ -22,6 +22,7 @@ export class RouterMiddleware implements Middleware {
         }
 
         ctx.matchedRoute = handler;
+        ctx.params = ctx.matchedRoute.params || {};
 
         const handlerInstance = config.activator.createInstance(handler);
         const result = await handlerInstance.handle(ctx);

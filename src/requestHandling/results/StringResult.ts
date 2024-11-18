@@ -10,7 +10,7 @@ export class StringResult implements IActionResult {
 
     public executeResult(output: IOutputChannel) {
         output.writeHeaders(this.statusCode, { 'Content-Type': 'text' });
-        output.writeBody(this.data);
+        output.writeBody(this.data || "");
         output.end();
     }
 }

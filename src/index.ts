@@ -9,6 +9,7 @@ import { ErrorHandlingMiddleware } from './requestHandling/middleware/ErrorHandl
 import createMiddlewareChain from './requestHandling/middleware/createMiddlewareChain';
 import createHttpAdapter from "./adapters/HttpAdapterFactory";
 import { Logger } from './observability/Logger';
+import { IOutputChannel } from './adapters/IOutputChannel';
 
 export class Application {
     public configuration: Configuration;
@@ -33,18 +34,24 @@ export class Application {
 
     public listen(port: number) {
         this.configuration.httpHost.listen(port, async (output) => {
-            const ctx: Context = { 
-                output: output, 
-                config: this.configuration 
-            };
-
-            const { middleware, nextFunc } = createMiddlewareChain(this.configuration, ctx);
-
-            Logger.debug("Running", middleware.name.description);
-
-            await middleware.process(ctx, nextFunc!);
-
-            Logger.debug("Finished", middleware.name.description);
+            await this.processRequest(output);
         });
+    }
+
+    public async processRequest(output: IOutputChannel) {
+        const ctx: Context = { 
+            request: output.request,
+            output: output, 
+            config: this.configuration,
+            params: {}
+        };
+
+        const { middleware, nextFunc } = createMiddlewareChain(this.configuration, ctx);
+
+        Logger.debug("Running", middleware.name.description);
+
+        await middleware.process(ctx, nextFunc!);
+
+        Logger.debug("Finished", middleware.name.description);
     }
 }

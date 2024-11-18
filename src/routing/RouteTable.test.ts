@@ -62,6 +62,16 @@ describe("RouteTable", () => {
         expect(result?.params?.rest).toBe("123");
     });
 
+    it("matches wildcard route without explicit wildcard with capture", () => {
+        const route = async () => { return "hello"; };
+        const sut = new RouteTable().get("/hello/{rest}", route);
+
+        const result = sut.match({ method: "GET", url: "http://localhost/hello/123", headers: {} });
+
+        expect(result?.specifier).toBe("/hello/{rest}");
+        expect(result?.params?.rest).toBe("123");
+    });
+
     it("captures param from route", () => {
         const route = async () => { return "hello"; };
         const sut = new RouteTable().get("/users/{id:[0-9]+}", route);
