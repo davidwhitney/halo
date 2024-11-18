@@ -2,6 +2,26 @@ import { describe, it, expect } from "vitest";
 import { RouteTable } from "./RouteTable";
 
 describe("RouteTable", () => {
+    it("can correctly use the convenience methods", () => {
+        const route = async () => { return "hello"; };
+
+        const sut = new RouteTable()
+            .get("/", route)
+            .post("/", route)
+            .put("/", route)
+            .delete("/", route)
+            .patch("/", route)
+            .head("/", route);
+
+        expect(sut.entries.size).toBe(6);
+        expect(sut.entries.get("GET::/")).toBeDefined();
+        expect(sut.entries.get("POST::/")).toBeDefined();
+        expect(sut.entries.get("PUT::/")).toBeDefined();
+        expect(sut.entries.get("DELETE::/")).toBeDefined();
+        expect(sut.entries.get("PATCH::/")).toBeDefined();
+        expect(sut.entries.get("HEAD::/")).toBeDefined();
+    });
+
     it("matches nothing when no route found", () => {
         const sut = new RouteTable();
 

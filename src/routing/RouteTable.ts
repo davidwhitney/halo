@@ -81,7 +81,6 @@ export class RouteTable {
 
         }
 
-
         const key = `${metadata.method}::${urlObj.pathname}`;
         return this.entries.get(key);
     }
