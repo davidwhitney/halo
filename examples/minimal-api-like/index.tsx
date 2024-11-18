@@ -16,7 +16,7 @@ function MyComponent() {
 }
 
 const router = new RouteTable();
-router.get('/hello', Handler);
+router.get('/', Handler);
 router.get('/world', async (ctx: Context) => {
     return {
         foo: "world"

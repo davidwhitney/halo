@@ -1,38 +1,28 @@
-import * as React from 'react';
-import { Logger } from '../observability/Logger';
 import { FunctionWrappingRouteHandler } from './FunctionWrappingRouteHandler';
-import { ServerSideComponentRouteHandler } from './ServerSideComponentRouteHandler';
-import { IHandleRoutes, RouteHandler, RouteHandlerConstructor, RouteHandlerFunction, RouteRegistration } from '../types';
+import { ServerSideComponentRouteHandler, ServerSideComponentThatRequiresInvocationHandler } from './ServerSideComponentRouteHandler';
+import { RouteHandler, RouteRegistration } from '../types';
 
 export class Activator {
     public createInstance(registration: RouteRegistration): RouteHandler {
+        // TODO: Do DI for constructors here.
+
         const { handler } = registration;
+        const unknownHandler = handler as any;
 
-        // TODO: do this properly with type guards
-        // TODO: DI for constructor injection
-        let instance: RouteHandler;
-        if (typeof handler === 'function') {
-            if (handler.prototype && handler.prototype.handle && this.isConstuctorFunction(handler)) {
-                // It's a class constructor
-                instance = new handler() as RouteHandler;
-            } else {
-                // It's a regular function handler
-                instance = new FunctionWrappingRouteHandler(handler as RouteHandlerFunction) as RouteHandler;
-            }
-        } else if (React.isValidElement(handler)) {
-            // It's a JSX element
-            instance = new ServerSideComponentRouteHandler(handler) as RouteHandler;
-        } else {
-            // Handler is already an instance
-            instance = handler as RouteHandler;
+        switch (registration.type) {
+            case "constructor":
+                return new unknownHandler() as RouteHandler;
+            case "react-component":
+                const component: () => JSX.Element = unknownHandler;
+                return new ServerSideComponentThatRequiresInvocationHandler(component);
+            case "function":
+                return new FunctionWrappingRouteHandler(unknownHandler);
+            case "jsx-element":
+                return new ServerSideComponentRouteHandler(unknownHandler);
+            case "handler-instance":
+                return handler as RouteHandler;
+            default:
+                throw new Error(`Unknown handler type: ${registration.type}`);
         }
-
-        Logger.info('Created instance:', instance);
-
-        return instance;
-    }
-
-    private isConstuctorFunction(handler: IHandleRoutes): handler is RouteHandlerConstructor {
-        return typeof handler === 'function';
     }
 }

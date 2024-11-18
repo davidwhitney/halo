@@ -8,3 +8,12 @@ export class ServerSideComponentRouteHandler implements RouteHandler {
         return new ReactComponentResult(this.component, null);
     }
 }
+
+export class ServerSideComponentThatRequiresInvocationHandler implements RouteHandler {
+    constructor(private component: () => JSX.Element) { }
+    public async handle(ctx: Context) {
+        // TODO: Pass props here - request data, context, etc
+        const output = this.component();
+        return new ReactComponentResult(output, null);
+    }
+}
