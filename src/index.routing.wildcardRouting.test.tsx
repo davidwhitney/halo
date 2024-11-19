@@ -5,7 +5,7 @@ import { Context } from './requestHandling/Context';
 import { Client, serve } from './testing/httpHelpers';
 import { RouteTable } from './routing/RouteTable';
 
-describe("Application routing - verbs", () => {        
+describe("Application routing - wildcard routing", () => {        
     let client: Client;
     beforeAll(() => {
         client = serve((r: RouteTable) => r

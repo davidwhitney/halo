@@ -5,7 +5,7 @@ import { Client, serve } from './testing/httpHelpers';
 import { RouteTable } from './routing/RouteTable';
 import { empty, json, redirect, stringResult } from './requestHandling/results';
 
-describe("Application routing - React support", () => {
+describe("Application routing - Action Results", () => {
     let client: Client;
     beforeAll(() => {
         client = serve((r: RouteTable) => r

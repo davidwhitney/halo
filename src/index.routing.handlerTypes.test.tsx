@@ -13,7 +13,7 @@ class NamedHandler implements RouteHandler {
 
 const namedHandlerInstance = new NamedHandler();
 
-describe("Application covering tests", () => {    
+describe("Application routing - Handler Types", () => {    
     let client: Client;
     beforeAll(() => {
         client = serve((r: RouteTable) => r
