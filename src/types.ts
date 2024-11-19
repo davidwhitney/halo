@@ -1,7 +1,7 @@
 import { Context } from "./requestHandling/Context";
 import { IActionResult } from "./requestHandling/results/IActionResult";
 
-export type RouteHandler = { handle(ctx: Context): Promise<any>; }
+export type RouteHandler = { handle(ctx: Context): Promise<IActionResult>; }
 export type RouteHandlerConstructor = { new (): RouteHandler; }
 export type RouteHandlerFunction = (ctx: Context) => Promise<any>;
 
@@ -10,7 +10,8 @@ export type IHandleRoutes = RouteHandler
     | RouteHandlerConstructor 
     | JSX.Element 
     | (<T = any>(props?: T) => JSX.Element)
-    | (() => JSX.Element);
+    | (() => JSX.Element)
+    | ((props: Context) => JSX.Element);
 
 export interface RouteRegistration { 
     specifier: string; 

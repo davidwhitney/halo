@@ -1,9 +1,9 @@
 import React from 'react';
-import { Context } from "vm";
 import { Application } from ".";
 import { stringResult, redirect, empty, json } from "./requestHandling/results";
 import { RouteHandler } from "./types";
 import { beforeAll, describe, it, expect } from 'vitest';
+import { Context } from './requestHandling/Context';
 
 describe("Application", () => {    
     let sut: Application;
@@ -14,6 +14,11 @@ describe("Application", () => {
 
     it("can get basic handler request", async () => {
         const text = await reqText("/");
+        expect(text).toBe("hello");
+    });
+
+    it("can get handler instance request", async () => {
+        const text = await reqText("/handler-instance");
         expect(text).toBe("hello");
     });
 
@@ -65,14 +70,19 @@ describe("Application", () => {
         expect(text).toContain("Error: oops");
     });
 
-    it("can get react component rendered server side", async () => {
-        const text = await reqText("/react");
-        expect(text).toContain("<div>Hello World!!!</div>");
+    it("can get react component rendered server side when passed as a function", async () => {
+        const text = await reqText("/react1");
+        expect(text).toContain("<div>Hello World!!! - <!-- -->GET</div>");
     });
 
-    it("can get react component rendered server side when passed as a function", async () => {
+    it("can get react component rendered server side when returned from a function", async () => {
         const text = await reqText("/react2");
-        expect(text).toContain("<div>Hello World!!!</div>");
+        expect(text).toContain("<div>Hello World!!! - <!-- -->GET</div>");
+    });
+
+    it("can get react component rendered server side when passed as resolved markup", async () => {
+        const text = await reqText("/react3");
+        expect(text).toContain("<div>Hello World!!! - <!-- -->GET</div>");
     });
 });
 
@@ -91,9 +101,17 @@ async function reqJson(url: string, method: string = "GET") {
 }
 
 function getTestApp() {
-    function MyComponent() {
-        return (<div>Hello World!!!</div>);
+    function MyComponent(props?: Partial<Context>) {
+        return (<div>Hello World!!! - {props?.request?.method}</div>);
     }
+
+    class NamedHandler implements RouteHandler {
+        public async handle(ctx: Context) {
+            return stringResult('hello');
+        }
+    }
+
+    const namedHandlerInstance = new NamedHandler();
 
     const app = new Application();
     app.configuration.router
@@ -102,6 +120,7 @@ function getTestApp() {
             return stringResult('hello');
         }
     })
+    .get('/handler-instance', namedHandlerInstance)
     .get('/object-result', async (ctx: Context) => { return { foo: "world" };})
     .get('/json-object-result', async (ctx: Context) => { return json({ foo: "world" });})
     .get('/function-callback', async (ctx: Context) => { return stringResult('hello world'); })
@@ -110,8 +129,9 @@ function getTestApp() {
     .get('/with-wildcard/{value:*}', async ({ params }: Context) => { return stringResult(params.value); })
     .get('/with-params/{id:[A-Za-z]+}', async ({ params }: Context) => { return stringResult(params.id); })
     .get('/error', async (ctx: Context) => { throw new Error('oops'); })
-    .get('/react', <MyComponent />)
-    .get('/react2', MyComponent);
+    .get('/react1', MyComponent)
+    .get('/react2', async (ctx: Context) => <MyComponent {...ctx} />)
+    .get('/react3', <MyComponent />);
 
     return app;
 }

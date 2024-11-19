@@ -1,19 +1,21 @@
 import { ReactComponentResult } from "../requestHandling/results/ReactComponentResult";
 import { Context } from "../requestHandling/Context";
 import { RouteHandler } from "../types";
+import React from "react";
 
 export class ServerSideComponentRouteHandler implements RouteHandler {
     constructor(private component: JSX.Element) { }
     public async handle(ctx: Context) {
-        return new ReactComponentResult(this.component, null);
+        const newProps = { ...this.component.props, ...ctx };
+        const clone = React.cloneElement(this.component, newProps);
+        return new ReactComponentResult(clone);
     }
 }
 
 export class ServerSideComponentThatRequiresInvocationHandler implements RouteHandler {
-    constructor(private component: () => JSX.Element) { }
+    constructor(private component: (props?: Context) => JSX.Element) { }
     public async handle(ctx: Context) {
-        // TODO: Pass props here - request data, context, etc
-        const output = this.component();
-        return new ReactComponentResult(output, null);
+        const output = this.component(ctx);
+        return new ReactComponentResult(output);
     }
 }
