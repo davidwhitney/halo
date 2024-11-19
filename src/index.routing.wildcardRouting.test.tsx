@@ -10,6 +10,7 @@ describe("Application routing - wildcard routing", () => {
     beforeAll(() => {
         client = serve((r: RouteTable) => r
         .get('/with-wildcard/{value:*}', async ({ params }: Context) => { return stringResult(params.value); })
+        .get('/with-wildcard-no-capture/*', async ({ params }: Context) => { return stringResult(params.value); })
         .get('/with-params/{id:[A-Za-z]+}', async ({ params }: Context) => { return stringResult(params.id); })
         );
     });
@@ -18,6 +19,12 @@ describe("Application routing - wildcard routing", () => {
         const randomValue = Math.random().toString();
         const text = await client.reqText("/with-wildcard/" + randomValue);
         expect(text).toBe(randomValue);
+    });
+
+    it("can use wildcard route without data capture", async () => {
+        const randomValue = Math.random().toString();
+        const text = await client.reqText("/with-wildcard-no-capture/" + randomValue);
+        expect(text).toBe('');
     });
 
     it("can use regex params route", async () => {
