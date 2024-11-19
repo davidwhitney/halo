@@ -1,5 +1,5 @@
 import { FunctionWrappingRouteHandler } from './FunctionWrappingRouteHandler';
-import { ServerSideComponentRouteHandler, ServerSideComponentThatRequiresInvocationHandler } from './ServerSideComponentRouteHandler';
+import { ServerSideComponentRouteHandler } from './ServerSideComponentRouteHandler';
 import { RouteHandler, RouteRegistration } from '../types';
 
 export class Activator {
@@ -12,9 +12,6 @@ export class Activator {
         switch (registration.type) {
             case "constructor":
                 return new unknownHandler() as RouteHandler;
-            case "react-component":
-                const component: () => JSX.Element = unknownHandler;
-                return new ServerSideComponentThatRequiresInvocationHandler(component);
             case "function":
                 return new FunctionWrappingRouteHandler(unknownHandler);
             case "jsx-element":

@@ -11,11 +11,3 @@ export class ServerSideComponentRouteHandler implements RouteHandler {
         return new ReactComponentResult(clone);
     }
 }
-
-export class ServerSideComponentThatRequiresInvocationHandler implements RouteHandler {
-    constructor(private component: (props?: Context) => JSX.Element) { }
-    public async handle(ctx: Context) {
-        const output = this.component(ctx);
-        return new ReactComponentResult(output);
-    }
-}
