@@ -1,4 +1,3 @@
-import React from 'react';
 import { describe, it, expect, beforeAll } from 'vitest';
 import { Context } from './requestHandling/Context';
 import { Client, serve } from './testing/httpHelpers';

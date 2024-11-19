@@ -1,4 +1,3 @@
-import React from 'react';
 import { stringResult } from "./requestHandling/results";
 import { describe, it, expect, beforeAll } from 'vitest';
 import { Context } from './requestHandling/Context';
