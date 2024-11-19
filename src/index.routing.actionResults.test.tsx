@@ -3,7 +3,8 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { Context } from './requestHandling/Context';
 import { Client, serve } from './testing/httpHelpers';
 import { RouteTable } from './routing/RouteTable';
-import { empty, json, redirect, stringResult } from './requestHandling/results';
+import { content, empty, json, notFound, redirect, stringResult } from './requestHandling/results';
+import { statusCode } from './requestHandling/results/StatusCodeResult';
 
 describe("Application routing - Action Results", () => {
     let client: Client;
@@ -14,6 +15,9 @@ describe("Application routing - Action Results", () => {
         .get('/string-result', async (ctx: Context) => { return stringResult('hello world'); })
         .get('/redirect-result', async (ctx: Context) => { return redirect('/helloworld'); })
         .get('/empty-result', async (ctx: Context) => { return empty(); })
+        .get('/not-found-result', async (ctx: Context) => { return notFound(); })
+        .get('/status-302', async (ctx: Context) => { return statusCode(302); })
+        .get('/content-type', async (ctx: Context) => { return content(`{ "foo": 123 }`, 'text/json'); })
         );
     });
     
@@ -41,5 +45,20 @@ describe("Application routing - Action Results", () => {
     it("can get nothing result", async () => {
         const response = await client.req("/empty-result");
         expect(response.status).toBe(204);
+    });
+
+    it("can get not found result", async () => {
+        const response = await client.req("/not-found-result");
+        expect(response.status).toBe(404);
+    });
+
+    it("can get status result", async () => {
+        const response = await client.req("/status-302");
+        expect(response.status).toBe(302);
+    });
+
+    it("can get content result", async () => {
+        const response = await client.reqJson("/content-type");
+        expect(response.foo).toBe(123);
     });
 });
