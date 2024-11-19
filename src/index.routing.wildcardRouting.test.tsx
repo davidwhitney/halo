@@ -32,4 +32,10 @@ describe("Application routing - wildcard routing", () => {
         const text = await client.reqText("/with-params/" + randomStringValueOfAz);
         expect(text).toBe(randomStringValueOfAz);
     });
+
+    it("regex params route - non-compliant match - 404s", async () => {
+        const randomValue = Math.random().toString();
+        const response = await client.req("/with-params/" + randomValue);
+        expect(response.status).toBe(404);
+    });
 });
