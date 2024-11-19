@@ -30,7 +30,7 @@ export class XmlResult implements IActionResult, IContentTypeNegotiator {
 
         const xml = builder.build(this.data);
 
-        output.writeHeaders(this.statusCode, { 'Content-Type': 'application/json' });
+        output.writeHeaders(this.statusCode, { 'Content-Type': 'application/xml' });
         output.writeBody(xml);
         output.end();
     }
