@@ -2,6 +2,7 @@ import { Context } from "../requestHandling/Context";
 import { IActionResult } from "../requestHandling/results/IActionResult";
 import { JsonResult } from "../requestHandling/results/JsonResult";
 import { ReactComponentResult } from "../requestHandling/results/ReactComponentResult";
+import { XmlResult } from "../requestHandling/results/XmlResult";
 import { RouteHandler, RouteHandlerFunction } from "../types";
 
 export class FunctionWrappingRouteHandler implements RouteHandler {
@@ -20,7 +21,24 @@ export class FunctionWrappingRouteHandler implements RouteHandler {
             return new ReactComponentResult(functionResult);
         }
 
-        // Content negotiation could go here, but for now we'll just return JSON.
+        // Object result
+        return this.negotiateContentType(ctx, functionResult);
+    }
+
+    private negotiateContentType(ctx: Context, functionResult: any) {
+        const contentTypeNegotiators = [
+            JsonResult,
+            XmlResult
+        ];
+
+        const acceptHeader = ctx.request.headers['accept'];
+        for (const negotiatorCtor of contentTypeNegotiators) {
+            const result = new negotiatorCtor(functionResult);
+            if (result.respondsTo(acceptHeader)) {
+                return result;
+            }
+        }
+
         return new JsonResult(functionResult);
     }
 }
