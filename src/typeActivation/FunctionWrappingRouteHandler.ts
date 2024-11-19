@@ -32,6 +32,10 @@ export class FunctionWrappingRouteHandler implements RouteHandler {
         ];
 
         const acceptHeader = ctx.request.headers['accept'];
+        if (!acceptHeader) {
+            return new JsonResult(functionResult);
+        }
+
         for (const negotiatorCtor of contentTypeNegotiators) {
             const result = new negotiatorCtor(functionResult);
             if (result.respondsTo(acceptHeader)) {
