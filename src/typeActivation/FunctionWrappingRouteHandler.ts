@@ -32,7 +32,7 @@ export class FunctionWrappingRouteHandler implements RouteHandler {
         ];
 
         const acceptHeader = ctx.request.headers['accept'];
-        if (!acceptHeader) {
+        if (!acceptHeader || acceptHeader === '*/*' || acceptHeader.length === 0) {
             return new JsonResult(functionResult);
         }
 
