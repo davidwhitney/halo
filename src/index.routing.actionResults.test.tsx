@@ -16,7 +16,7 @@ describe("Application routing - Action Results", () => {
         .get('/empty-result', async (ctx: Context) => { return empty(); })
         .get('/not-found-result', async (ctx: Context) => { return notFound(); })
         .get('/status-302', async (ctx: Context) => { return statusCode(302); })
-        .get('/content-type', async (ctx: Context) => { return content(`{ "foo": 123 }`, 'text/json'); })
+        .get('/content-type', async (ctx: Context) => { return content(`{ "foo": 123 }`, 'text/json+something'); })
         );
     });
     
@@ -57,7 +57,10 @@ describe("Application routing - Action Results", () => {
     });
 
     it("can get content result", async () => {
-        const response = await client.reqJson("/content-type");
-        expect(response.foo).toBe(123);
+        const response = await client.req("/content-type");
+        const body = await response.json();
+
+        expect(body.foo).toBe(123);
+        expect(response.headers.get('Content-Type')).toBe('text/json+something');
     });
 });
