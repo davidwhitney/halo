@@ -6,10 +6,10 @@ import { Context } from './requestHandling/Context';
 import { Configuration } from './Configuration';
 import { LoggingMiddleware } from './requestHandling/middleware/LoggingMiddleware';
 import { ErrorHandlingMiddleware } from './requestHandling/middleware/ErrorHandlingMiddleware';
-import createMiddlewareChain from './requestHandling/middleware/createMiddlewareChain';
-import createHttpAdapter from "./adapters/HttpAdapterFactory";
 import { Logger } from './observability/Logger';
 import { IOutputChannel } from './adapters/IOutputChannel';
+import createMiddlewareChain from './requestHandling/middleware/createMiddlewareChain';
+import createHttpAdapter from "./adapters/HttpAdapterFactory";
 
 export class Application {
     public configuration: Configuration;
