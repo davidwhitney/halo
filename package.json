@@ -2,9 +2,12 @@
   "name": "halo",
   "version": "0.0.1",
   "description": "A better TypeScript webapp framework",
-  "main": "index.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "test": "vitest",
+    "build": "tsup src/index.ts",
     "example:minimalapi": "tsx watch ./examples/minimal-api-like/index.tsx",
     "deno:example:minimalapi": "deno run --allow-net --allow-env --unstable-sloppy-imports --watch ./examples/minimal-api-like/index.tsx",
     "deno:example:mvclike": "deno run --allow-net --allow-env --unstable-sloppy-imports --watch ./examples/mvc-like/index.tsx"
@@ -31,6 +34,7 @@
     "@types/node": "^22.9.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "tsup": "^8.3.5",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3",
     "vitest": "^2.1.5"
