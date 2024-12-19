@@ -1,8 +1,9 @@
-export { content } from "./ContentResult";
-export { empty } from "./EmptyResult";
-export { json } from "./JsonResult";
-export { notFound } from "./NotFoundResult";
-export { reactComponent } from "./ReactComponentResult";
-export { redirect } from "./RedirectResult";
-export { statusCode } from "./StatusCodeResult";
-export { stringResult } from "./StringResult";
+export { content, ContentResult } from "./ContentResult";
+export { empty, EmptyResult } from "./EmptyResult";
+export { json, JsonResult } from "./JsonResult";
+export { notFound, NotFoundResult } from "./NotFoundResult";
+export { reactComponent, ReactComponentResult } from "./ReactComponentResult";
+export { redirect, RedirectResult } from "./RedirectResult";
+export { statusCode, StatusCodeResult } from "./StatusCodeResult";
+export { stringResult, StringResult } from "./StringResult";
+export { xml, XmlResult } from "./XmlResult";

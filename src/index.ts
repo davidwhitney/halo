@@ -1,57 +1,39 @@
-import { Activator } from './typeActivation/Activator';
-import { RouteTable } from './routing/RouteTable';
-import { RouterMiddleware as RouterMiddleware } from "./requestHandling/middleware/RouterMiddleware";
-import { DeveloperPageErrorHandler } from './requestHandling/errors/DeveloperPageErrorHandler';
-import { Context } from './requestHandling/Context';
-import { Configuration } from './Configuration';
-import { LoggingMiddleware } from './requestHandling/middleware/LoggingMiddleware';
-import { ErrorHandlingMiddleware } from './requestHandling/middleware/ErrorHandlingMiddleware';
-import { Logger } from './observability/Logger';
-import { IOutputChannel } from './adapters/IOutputChannel';
-import createMiddlewareChain from './requestHandling/middleware/createMiddlewareChain';
+export { Application } from "./Application";
+export { Configuration } from "./Configuration";
+export { Context } from "./requestHandling/Context";
+export { ErrorHandler } from "./types";
+
+import DenoHttpAdapter from "./adapters/DenoHttpAdapter";
+export { DenoHttpAdapter };
+
 import createHttpAdapter from "./adapters/HttpAdapterFactory";
+export { createHttpAdapter };
 
-export class Application {
-    public configuration: Configuration;
+import { IHttpAdapter } from "./adapters/IHttpAdapter";
+export { IHttpAdapter };
 
-    constructor(configuration?: Partial<Configuration>) {
-        this.configuration = {
-            errorHandler: DeveloperPageErrorHandler,
-            httpHost: createHttpAdapter(),
-            activator: new Activator(),
-            router: new RouteTable(),
-            middleware: [
-                LoggingMiddleware,
-                ErrorHandlingMiddleware
-            ]
-        };
+export { IOutputChannel } from "./adapters/IOutputChannel";
 
-        this.configuration = { ...this.configuration, ...configuration || {} };
+import NodeHttpAdapter from "./adapters/NodeHttpAdapter";
+export { NodeHttpAdapter };
 
-        // If this isn't the end of the chain the whole framework doesn't execute!
-        this.configuration.middleware.push(RouterMiddleware);
-    }
+export { NodeOutputChannel } from "./adapters/NodeHttpAdapter";
 
-    public listen(port: number) {
-        this.configuration.httpHost.listen(port, async (output) => {
-            await this.processRequest(output);
-        });
-    }
+export { Logger } from "./observability/Logger";
 
-    public async processRequest(output: IOutputChannel) {
-        const ctx: Context = { 
-            request: output.request,
-            output: output, 
-            config: this.configuration,
-            params: {}
-        };
+export { DefaultErrorHandler } from "./requestHandling/errors/DefaultErrorHandler";
+export { DeveloperPageErrorHandler } from "./requestHandling/errors/DeveloperPageErrorHandler";
 
-        const { middleware, nextFunc } = createMiddlewareChain(this.configuration, ctx);
+export { ErrorHandlingMiddleware } from "./requestHandling/middleware/ErrorHandlingMiddleware";
+export { LoggingMiddleware } from "./requestHandling/middleware/LoggingMiddleware";
+export { RouterMiddleware } from "./requestHandling/middleware/RouterMiddleware";
 
-        Logger.debug("Running", middleware.name.description);
+import createMiddlewareChain from "./requestHandling/middleware/createMiddlewareChain";
+export { createMiddlewareChain };
 
-        await middleware.process(ctx, nextFunc!);
+export * from "./requestHandling/results/index";
+export * from "./types";
 
-        Logger.debug("Finished", middleware.name.description);
-    }
-}
+import { RouteTable } from "./routing/RouteTable";
+export { RouteTable };
+
